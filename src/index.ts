@@ -1,27 +1,73 @@
-﻿import { Library } from "./library";
+﻿interface Livro {
+  id: number | string;
+  titulo: string;
+  autor: string;
+  anoPublicacao: number;
+  disponivel: boolean;
+  tags: string[];
+}
 
-const library = new Library();
+type LivroResumo = Omit<Livro, "id" | "disponivel">;
 
-const book1 = library.addBook("Dom Casmurro", "Machado de Assis", 3);
-const book2 = library.addBook("O Cortiço", "Aluísio Azevedo", 2);
-const member1 = library.addMember("Ana Silva", "ana.silva@example.com");
-const member2 = library.addMember("Carlos Souza", "carlos.souza@example.com");
+type Categoria = "Programação" | "Ficção" | "Design";
 
-library.describeLibrary();
-console.log("");
-library.describeMembers();
-console.log("");
+const acervo: Livro[] = [
+  {
+    id: 1,
+    titulo: "Introdução ao TypeScript",
+    autor: "Marcos Silva",
+    anoPublicacao: 2023,
+    disponivel: true,
+    tags: ["Programação", "Design"],
+  },
+  {
+    id: "A-100",
+    titulo: "O Mundo Perdido",
+    autor: "Arthur Conan Doyle",
+    anoPublicacao: 1912,
+    disponivel: false,
+    tags: ["Ficção"],
+  },
+];
 
-const loan1 = library.borrowBook(book1.id, member1.id);
-console.log(`O livro "${book1.title}" foi emprestado para ${member1.name} até ${loan1.dueDate.toLocaleDateString()}.`);
+function buscarPorId(id: number | string): Livro | undefined {
+  return acervo.find((livro) => livro.id === id);
+}
 
-const loan2 = library.borrowBook(book2.id, member2.id);
-console.log(`O livro "${book2.title}" foi emprestado para ${member2.name} até ${loan2.dueDate.toLocaleDateString()}.`);
+function atualizarLivro(id: number | string, atualizacoes: Partial<Livro>): Livro | undefined {
+  const livro = buscarPorId(id);
+  if (!livro) {
+    return undefined;
+  }
 
-console.log("");
-library.describeLoans();
-console.log("\n--- Devolução ---");
-const returnedLoan = library.returnBook(loan1.id);
-console.log(`O livro "${book1.title}" foi devolvido por ${member1.name} em ${returnedLoan.returnDate?.toLocaleDateString()}.`);
-console.log("");
-library.describeLibrary();
+  Object.assign(livro, atualizacoes);
+  return livro;
+}
+
+const catalogoPorCategoria: Record<Categoria, LivroResumo[]> = {
+  Programação: [],
+  Ficção: [],
+  Design: [],
+};
+
+for (const livro of acervo) {
+  const resumo: LivroResumo = {
+    titulo: livro.titulo,
+    autor: livro.autor,
+    anoPublicacao: livro.anoPublicacao,
+    tags: livro.tags,
+  };
+
+  for (const categoria of livro.tags) {
+    if (categoria in catalogoPorCategoria) {
+      catalogoPorCategoria[categoria as Categoria].push(resumo);
+    }
+  }
+}
+
+console.log("Acervo inicial:", acervo);
+console.log("Buscar livro por id 1:", buscarPorId(1));
+
+const livroAtualizado = atualizarLivro("A-100", { disponivel: true, autor: "A. Conan Doyle" });
+console.log("Livro atualizado:", livroAtualizado);
+console.log("Resumo por categoria:", catalogoPorCategoria);
