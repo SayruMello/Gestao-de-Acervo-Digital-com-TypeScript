@@ -1,87 +1,27 @@
-export interface Livro {
-  id: number | string;
-  titulo: string;
-  autor: string;
-  anoPublicacao: number;
-  disponivel: boolean;
-  tags: string[];
-}
+﻿import { Library } from "./library";
 
-export const acervo: Livro[] = [
-  {
-    id: 1,
-    titulo: "TypeScript na Prática",
-    autor: "Ana Costa",
-    anoPublicacao: 2023,
-    disponivel: true,
-    tags: ["Programação", "TypeScript"],
-  },
-  {
-    id: "B2",
-    titulo: "Design de Interfaces Inteligentes",
-    autor: "Rafael Souza",
-    anoPublicacao: 2021,
-    disponivel: false,
-    tags: ["Design", "Ficção"],
-  },
-];
+const library = new Library();
 
-export function buscarPorId(id: number | string): Livro | undefined {
-  for (let livro of acervo) {
-    if (livro.id === id) {
-      return livro;
-    }
-  }
-  return undefined;
-}
+const book1 = library.addBook("Dom Casmurro", "Machado de Assis", 3);
+const book2 = library.addBook("O Cortiço", "Aluísio Azevedo", 2);
+const member1 = library.addMember("Ana Silva", "ana.silva@example.com");
+const member2 = library.addMember("Carlos Souza", "carlos.souza@example.com");
 
-export function atualizarLivro(id: number | string, alteracoes: Partial<Livro>): Livro | undefined {
-  const livro = buscarPorId(id);
-  if (!livro) {
-    return undefined;
-  }
+library.describeLibrary();
+console.log("");
+library.describeMembers();
+console.log("");
 
-  if (alteracoes.titulo !== undefined) {
-    livro.titulo = alteracoes.titulo;
-  }
-  if (alteracoes.autor !== undefined) {
-    livro.autor = alteracoes.autor;
-  }
-  if (alteracoes.anoPublicacao !== undefined) {
-    livro.anoPublicacao = alteracoes.anoPublicacao;
-  }
-  if (alteracoes.disponivel !== undefined) {
-    livro.disponivel = alteracoes.disponivel;
-  }
-  if (alteracoes.tags !== undefined) {
-    livro.tags = alteracoes.tags;
-  }
+const loan1 = library.borrowBook(book1.id, member1.id);
+console.log(`O livro "${book1.title}" foi emprestado para ${member1.name} até ${loan1.dueDate.toLocaleDateString()}.`);
 
-  return livro;
-}
+const loan2 = library.borrowBook(book2.id, member2.id);
+console.log(`O livro "${book2.title}" foi emprestado para ${member2.name} até ${loan2.dueDate.toLocaleDateString()}.`);
 
-export type LivroResumo = Omit<Livro, "id" | "disponivel">;
-
-export function mapearPorCategorias(): Record<string, LivroResumo[]> {
-  const categorias: Record<string, LivroResumo[]> = {};
-
-  for (let livro of acervo) {
-    const resumo: LivroResumo = {
-      titulo: livro.titulo,
-      autor: livro.autor,
-      anoPublicacao: livro.anoPublicacao,
-      tags: livro.tags,
-    };
-
-    for (let tag of livro.tags) {
-      if (!categorias[tag]) {
-        categorias[tag] = [];
-      }
-      categorias[tag].push(resumo);
-    }
-  }
-
-  return categorias;
-}
-
-export const livrosPorCategoria = mapearPorCategorias();
+console.log("");
+library.describeLoans();
+console.log("\n--- Devolução ---");
+const returnedLoan = library.returnBook(loan1.id);
+console.log(`O livro "${book1.title}" foi devolvido por ${member1.name} em ${returnedLoan.returnDate?.toLocaleDateString()}.`);
+console.log("");
+library.describeLibrary();
